@@ -1,12 +1,9 @@
 import { ObjectId } from "mongodb";
-
 import { Router, getExpressRouter } from "./framework/router";
-
-import { Authing, Friending, Posting, Sessioning } from "./app";
+import { Authing, Friending, Posting, Sessioning, Grouping, Calendaring, Eventing } from "./app";
 import { PostOptions } from "./concepts/posting";
 import { SessionDoc } from "./concepts/sessioning";
 import Responses from "./responses";
-
 import { z } from "zod";
 
 /**
@@ -151,6 +148,56 @@ class Routes {
     const user = Sessioning.getUser(session);
     const fromOid = (await Authing.getUserByUsername(from))._id;
     return await Friending.rejectRequest(fromOid, user);
+  }
+
+  // Add another user to a group that you are already in
+  @Router.put("/group/:userId")
+  async addToGroup(session: SessionDoc, inviteeId: string, groupId: string) {
+    const user = Sessioning.getUser(session);
+    const groupOid = new ObjectId(groupId);
+    const inviteeOid = new ObjectId(inviteeId);
+    await Grouping.assertIsInGroup(user, groupOid);
+    return await Grouping.inviteUser(groupOid, inviteeOid);
+  }
+
+// If a user is logged in, add an event to the calendar
+@Router.put("/calendar")
+async addEventToCalendar(session: SessionDoc, eventId: string) {
+  const user = Sessioning.getUser(session);
+  await Calendaring.addItem(user, eventId); // Adding the event to the user's calendar
+  return { msg: "Event added to calendar!" };
+}
+
+
+  // You can delete your own calendar event
+  @Router.delete("/calendar/:eventId")
+  async deleteEventFromCalendar(session: SessionDoc, userId: string, eventId: string) {
+    const user = Sessioning.getUser(session);
+    const eventOid = new ObjectId(eventId)
+    const userOid = new ObjectId(userId)
+    await Eventing.assertCreatorIsUser(eventOid, user);
+    return await Calendaring.removeItem(userOid,eventId);
+  }
+
+  // Get calendar events by groupId
+  @Router.get("/calendar/group/:groupId")
+  async getEventsByGroupId(session: SessionDoc, groupId: string, members: string[])
+   {
+    const membersOid: ObjectId[] = members.map(id => new ObjectId(id));
+    const user = Sessioning.getUser(session);
+    const events = await Calendaring.getItemsByGroupMembers(membersOid);
+    return { msg: "Fetched calendar events for group!", events };
+  }
+
+
+  // Get calendar events by groupId for members
+  @Router.get("/calendar/group/:groupId/events")
+  async getCalendarEventsByGroupId(session: SessionDoc, groupId: string) {
+    const user = Sessioning.getUser(session);
+    const groupoid = new ObjectId(groupId)
+    const members = await Grouping.getMembers(groupoid);
+    const events = await Calendaring.getItemsByGroupMembers(members);
+    return { msg: "Fetched calendar events for group members!", events };
   }
 }
 

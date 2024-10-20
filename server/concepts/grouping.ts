@@ -21,7 +21,7 @@ export interface GroupDoc extends BaseDoc {
 /**
  * concept: Grouping [Group]
  */
-export default class GroupConcept {
+export default class GroupingConcept {
     public readonly groups: DocCollection<GroupDoc>;
 
     constructor(collectionName: string) {
@@ -37,13 +37,9 @@ export default class GroupConcept {
   /**
    * Invites a user to join the group if the inviter is the admin.
    */
-  async inviteUser(groupId: ObjectId, inviter: ObjectId, invitee: ObjectId) {
+  async inviteUser(groupId: ObjectId, invitee: ObjectId) {
     const group = await this.groups.readOne({ _id: groupId });
     if (!group) throw new NotFoundError("Group not found!");
-
-    if (group.creator.toString() !== inviter.toString()) {
-      throw new NotAllowedError("You don't have permission to invite users!");
-    }
 
     if (group.members.includes(invitee)) {
       return { msg: "User is already a member!" };
@@ -59,11 +55,21 @@ export default class GroupConcept {
   /**
    * Lists all members of the group.
    */
-  async listGroupMembers(groupId: ObjectId) {
+  async getMembers(groupId: ObjectId) {
     const group = await this.groups.readOne({ _id: groupId });
     if (!group) throw new NotFoundError("Group not found!");
 
     return group.members;
+  }
+
+  async assertIsInGroup(userId: ObjectId, groupId: ObjectId) {
+    const group = await this.groups.readOne({ groupId });
+    if (!group) {
+      throw new NotFoundError(`Group ${groupId} does not exist!`);
+    }
+    if (!group.members.includes(userId) ) {
+      throw new NotAllowedError(`User ${userId}, not allowed to invite to ${groupId}`);
+    }
   }
 
   /**
@@ -84,4 +90,3 @@ export default class GroupConcept {
     return { msg: "You have successfully left the group!" };
   }
   }
-
