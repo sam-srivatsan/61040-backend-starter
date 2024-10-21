@@ -3,6 +3,7 @@ import { Router, getExpressRouter } from "./framework/router";
 import { Authing, Friending, Posting, Sessioning, Grouping, Calendaring, Eventing } from "./app";
 import { PostOptions } from "./concepts/posting";
 import { SessionDoc } from "./concepts/sessioning";
+import { GroupOptions } from "./concepts/grouping";
 import Responses from "./responses";
 import { z } from "zod";
 
@@ -87,6 +88,13 @@ class Routes {
     return { msg: created.msg, post: await Responses.post(created.post) };
   }
 
+  @Router.post("/group")
+  async createGroup(session: SessionDoc, creator: ObjectId, title: string, members: ObjectId[], description?: string, options?: GroupOptions) {
+    const user = Sessioning.getUser(session);
+    const created = await Grouping.create(user, title, members, description, options);
+    return { msg: created.msg, groupId: created.groupId };
+  }
+
   @Router.patch("/posts/:id")
   async updatePost(session: SessionDoc, id: string, content?: string, options?: PostOptions) {
     const user = Sessioning.getUser(session);
@@ -167,6 +175,8 @@ async addEventToCalendar(session: SessionDoc, eventId: string) {
   await Calendaring.addItem(user, eventId); // Adding the event to the user's calendar
   return { msg: "Event added to calendar!" };
 }
+
+
 
 
   // You can delete your own calendar event
