@@ -45,6 +45,12 @@ const operations: Operation[] = [
     fields: { currentPassword: "input", newPassword: "input" },
   },
   {
+    name: "Create Group",
+    endpoint: "/api/group",
+    method: "POST",
+    fields: { title: "input", members: "input" },
+  },
+  {
     name: "Delete User",
     endpoint: "/api/users",
     method: "DELETE",

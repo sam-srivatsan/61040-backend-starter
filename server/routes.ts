@@ -89,9 +89,9 @@ class Routes {
   }
 
   @Router.post("/group")
-  async createGroup(session: SessionDoc, creator: ObjectId, title: string, members: ObjectId[], description?: string, options?: GroupOptions) {
+  async createGroup(session: SessionDoc, title: string, members: ObjectId[]) {
     const user = Sessioning.getUser(session);
-    const created = await Grouping.create(user, title, members, description, options);
+    const created = await Grouping.create(user, title, members);
     return { msg: created.msg, groupId: created.groupId };
   }
 
