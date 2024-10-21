@@ -95,6 +95,13 @@ class Routes {
     return { msg: created.msg, groupId: created.groupId };
   }
 
+  @Router.post("/calendar")
+  async createCalendar(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    const created = await Calendaring.createCalendar(user);
+    return { msg: created.msg, groupId: created.calendar };
+  }
+
   @Router.patch("/posts/:id")
   async updatePost(session: SessionDoc, id: string, content?: string, options?: PostOptions) {
     const user = Sessioning.getUser(session);
@@ -169,7 +176,7 @@ class Routes {
   }
 
 // If a user is logged in, add an event to the calendar
-@Router.put("/calendar")
+@Router.put("/calendar/event")
 async addEventToCalendar(session: SessionDoc, eventId: string) {
   const user = Sessioning.getUser(session);
   await Calendaring.addItem(user, eventId); // Adding the event to the user's calendar

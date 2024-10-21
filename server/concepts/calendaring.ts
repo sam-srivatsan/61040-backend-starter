@@ -92,7 +92,6 @@ export default class CalendaringConcept {
     return { msg: "User's calendar fetched!", calendar };
   }
 
-  // TODO: CREATE A CALENDAR FOR A USER 
 
   // Retrieve items for a list of user IDs (group members)
   async getItemsByGroupMembers(memberIds: ObjectId[]): Promise<string[]> {

@@ -51,6 +51,12 @@ const operations: Operation[] = [
     fields: { title: "input", members: "input" },
   },
   {
+    name: "Create Calendar",
+    endpoint: "/api/calendar",
+    method: "POST",
+    fields: {  },
+  },
+  {
     name: "Delete User",
     endpoint: "/api/users",
     method: "DELETE",
@@ -94,7 +100,7 @@ const operations: Operation[] = [
   },
   {
     name: "Add Event to Calendar",
-    endpoint: "/api/calendar",
+    endpoint: "/api/calendar/event",
     method: "PUT",
     fields: { eventId: "input" },
   },
