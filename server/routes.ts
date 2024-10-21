@@ -179,9 +179,9 @@ async addEventToCalendar(session: SessionDoc, eventId: string) {
     return await Calendaring.removeItem(userOid,eventId);
   }
 
-  // Get calendar events by groupId
-  @Router.get("/calendar/group/:groupId")
-  async getEventsByGroupId(session: SessionDoc, groupId: string, members: string[])
+  // Get calendar events by group members
+  @Router.get("/calendar/group/:members")
+  async getEventsByGroupId(session: SessionDoc, members: string[])
    {
     const membersOid: ObjectId[] = members.map(id => new ObjectId(id));
     const user = Sessioning.getUser(session);
@@ -190,8 +190,8 @@ async addEventToCalendar(session: SessionDoc, eventId: string) {
   }
 
 
-  // Get calendar events by groupId for members
-  @Router.get("/calendar/group/:groupId/events")
+  // Get calendar events by groupId
+  @Router.get("/calendar/group/:groupId")
   async getCalendarEventsByGroupId(session: SessionDoc, groupId: string) {
     const user = Sessioning.getUser(session);
     const groupoid = new ObjectId(groupId)

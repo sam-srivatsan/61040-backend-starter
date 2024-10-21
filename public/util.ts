@@ -80,6 +80,38 @@ const operations: Operation[] = [
     method: "DELETE",
     fields: { id: "input" },
   },
+  {
+    name: "Add User to Your Group",
+    endpoint: "/api/group/:userId",
+    method: "PUT",
+    fields: { inviteeId: "input", groupId: "input" },
+  },
+  {
+    name: "Add Event to Calendar",
+    endpoint: "/api/calendar",
+    method: "PUT",
+    fields: { eventId: "input" },
+  },
+  {
+    name: "Delete Event From Calendar",
+    endpoint: "/api/calendar/:eventId",
+    method: "DELETE",
+    fields: { userId: "input", eventId: "input" },
+  },
+  {
+    name: "Get Calendar Events by Group Members",
+    endpoint: "/api/calendar/group/:groupId",
+    method: "GET",
+    fields: { members: "input" },
+  },
+  {
+    name: "Get Calendar Events by Group ID",
+    endpoint: "/api/calendar/group/:groupId",
+    method: "GET",
+    fields: { groupId: "input" },
+  },
+
+
   //
   // ...
   //
