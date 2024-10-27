@@ -63,7 +63,7 @@ export default class GroupingConcept {
   }
 
   async assertIsInGroup(userId: ObjectId, groupId: ObjectId) {
-    const group = await this.groups.readOne({ groupId });
+    const group = await this.groups.readOne({ _id: groupId });
     if (!group) {
       throw new NotFoundError(`Group ${groupId} does not exist!`);
     }

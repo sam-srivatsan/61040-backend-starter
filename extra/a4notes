@@ -1,3 +1,12 @@
+SAM'S PERSONAL NOTES AS I DO A4
+
+remaining for assignment:
+- updated data modeling diagram
+- update blog with concepts and syncs
+- design reflection
+- debugging backend
+
+
 separate creategroup from addusertogroup: on frontend, only take a title. have that have its own route API
 - creategroup function in grouping.ts concept - DONE? or is inviteuser function not actually updating member list
 - routes.ts DONE
