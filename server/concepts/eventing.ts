@@ -47,16 +47,16 @@ export default class EventingConcept {
 }
 
 
-  // // Assert that the creator of the event is the current user
-  // async assertCreatorIsUser(eventId: ObjectId, user: ObjectId) {
-  //   const event = await this.events.readOne({ _id: eventId });
-  //   if (!event) {
-  //     throw new NotFoundError(`Event ${eventId} does not exist!`);
-  //   }
-  //   if (event.creator.toString() !== user.toString()) {
-  //     throw new EventCreatorNotMatchError(user, eventId);
-  //   }
-  // }
+  // Assert that the creator of the event is the current user
+  async assertCreatorIsUser(eventId: ObjectId, user: ObjectId) {
+    const event = await this.events.readOne({ _id: eventId });
+    if (!event) {
+      throw new NotFoundError(`Event ${eventId} does not exist!`);
+    }
+    if (event.creator.toString() !== user.toString()) {
+      throw new EventCreatorNotMatchError(user, eventId);
+    }
+  }
 
   // Get all events, sorted by date
   async getEvents() {
