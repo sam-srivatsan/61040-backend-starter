@@ -154,11 +154,13 @@ class Routes {
 
 
   @Router.post("/group")
-  async createGroup(session: SessionDoc, title: string) {
-    const user = Sessioning.getUser(session);
-    const created = await Grouping.create(user, title);
-    return { msg: created.msg, groupId: created.groupId };
+  async createGroup(session: SessionDoc, title: string, description?: string, options?: GroupOptions) {
+    const creator = Sessioning.getUser(session); // Gets the user from session
+    const result = await Grouping.create(creator, title, description, options); // Calls `create` with the necessary fields
+    return result; // Returns the group creation result, including group ID and title
   }
+
+
 
   // Add another user to a group that you are already in
   @Router.put("/group/:userId")
