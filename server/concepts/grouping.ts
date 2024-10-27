@@ -30,7 +30,7 @@ export default class GroupingConcept {
 
     async create(creator: ObjectId, title: string, description?: string, options?: GroupOptions) {
       const groupId = await this.groups.createOne({ creator, title, members: [creator], description, options });
-      return { msg: "Group successfully created!", groupId };
+      return { msg: "Group successfully created!", groupId, title };
     }
 
 

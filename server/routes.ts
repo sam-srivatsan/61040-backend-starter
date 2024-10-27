@@ -186,12 +186,6 @@ async leaveGroup(session: SessionDoc, groupId: string) {
   return result;
 }
 
-
-  /**
- * remove user from group
- * Specific errors beyond basic
- */
-
   @Router.post("/events/:groupId")
   async createEvent(session: SessionDoc, groupId: string, title: string, date: Date, description?: string) {
       const user = Sessioning.getUser(session);

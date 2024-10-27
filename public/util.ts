@@ -45,18 +45,6 @@ const operations: Operation[] = [
     fields: { currentPassword: "input", newPassword: "input" },
   },
   {
-    name: "Create Group",
-    endpoint: "/api/group",
-    method: "POST",
-    fields: { title: "input"},
-  },
-  {
-    name: "Create Calendar",
-    endpoint: "/api/calendar",
-    method: "POST",
-    fields: {  },
-  },
-  {
     name: "Delete User",
     endpoint: "/api/users",
     method: "DELETE",
@@ -93,35 +81,58 @@ const operations: Operation[] = [
     fields: { id: "input" },
   },
   {
+    name: "Create Group",
+    endpoint: "/api/group",
+    method: "POST",
+    fields: { title: "input"},
+  },
+  {
     name: "Add User to Your Group",
     endpoint: "/api/group/:userId",
     method: "PUT",
     fields: { inviteeId: "input", groupId: "input" },
   },
   {
-    name: "Add Event to Calendar",
-    endpoint: "/api/calendar/event",
-    method: "PUT",
-    fields: { eventId: "input" },
-  },
-  {
-    name: "Delete Event From Calendar",
-    endpoint: "/api/calendar/:eventId",
+    name: "Leave Group",
+    endpoint: "/api/groups/:groupId/members",
     method: "DELETE",
-    fields: { userId: "input", eventId: "input" },
+    fields: { groupId: "input" },
   },
   {
-    name: "Get Calendar Events by Group Members",
-    endpoint: "/api/calendar/group/:groupId",
-    method: "GET",
-    fields: { members: "input" },
+    name: "Delete Group",
+    endpoint: "/api/groups/:groupId",
+    method: "DELETE",
+    fields: { groupId: "input" },
   },
   {
-    name: "Get Calendar Events by Group ID",
-    endpoint: "/api/calendar/group/:groupId",
+    name: "Create Event",
+    endpoint: "/api/events/:groupId",
+    method: "POST",
+    fields: { groupId: "input", title: "input" }, //add date (format) and description?
+  },
+  {
+    name: "Edit Event",
+    endpoint: "/api/events/:eventId",
+    method: "PATCH",
+    fields: { groupId: "input" , title: "input" }, // date field etc
+  },
+  {
+    name: "Get Events by Group ID",
+    endpoint: "/api/groups/:groupId/events",
     method: "GET",
     fields: { groupId: "input" },
   },
+
+
+  // New operation to delete a user from a group and their events
+  {
+    name: "Remove User from Group",
+    endpoint: "/api/groups/:groupId/members",
+    method: "DELETE",
+    fields: { userId: "input" },
+  },
+
+
 
 
   //
