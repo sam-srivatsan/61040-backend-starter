@@ -1,0 +1,25 @@
+  @Router.post("/calendar")
+  async createCalendar(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    const created = await Calendaring.createCalendar(user);
+    return { msg: created.msg, groupId: created.calendar };
+  },
+
+  // If a user is logged in, add an event to the calendar
+@Router.put("/calendar/event")
+async addEventToCalendar(session: SessionDoc, eventId: string) {
+  const user = Sessioning.getUser(session);
+  await Calendaring.addItem(user, eventId); // Adding the event to the user's calendar
+  return { msg: "Event added to calendar!" };
+},
+
+
+  // You can delete your own calendar event
+  @Router.delete("/calendar/:eventId")
+  async deleteEventFromCalendar(session: SessionDoc, userId: string, eventId: string) {
+    const user = Sessioning.getUser(session);
+    const eventOid = new ObjectId(eventId)
+    const userOid = new ObjectId(userId)
+    await Eventing.assertCreatorIsUser(eventOid, user);
+    return await Calendaring.removeItem(userOid,eventId);
+  }

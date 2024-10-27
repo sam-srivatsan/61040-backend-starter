@@ -1,11 +1,12 @@
 import { ObjectId } from "mongodb";
 import { Router, getExpressRouter } from "./framework/router";
-import { Authing, Friending, Posting, Sessioning, Grouping, Calendaring, Eventing } from "./app";
+import { Authing, Friending, Posting, Sessioning, Grouping, Eventing } from "./app";
 import { PostOptions } from "./concepts/posting";
 import { SessionDoc } from "./concepts/sessioning";
 import { GroupOptions } from "./concepts/grouping";
 import Responses from "./responses";
 import { z } from "zod";
+import { NotAllowedError, NotFoundError } from "./concepts/errors";
 
 /**
  * Web server routes for the app. Implements synchronizations between concepts.
@@ -88,20 +89,6 @@ class Routes {
     return { msg: created.msg, post: await Responses.post(created.post) };
   }
 
-  @Router.post("/group")
-  async createGroup(session: SessionDoc, title: string, members: ObjectId[]) {
-    const user = Sessioning.getUser(session);
-    const created = await Grouping.create(user, title, members);
-    return { msg: created.msg, groupId: created.groupId };
-  }
-
-  @Router.post("/calendar")
-  async createCalendar(session: SessionDoc) {
-    const user = Sessioning.getUser(session);
-    const created = await Calendaring.createCalendar(user);
-    return { msg: created.msg, groupId: created.calendar };
-  }
-
   @Router.patch("/posts/:id")
   async updatePost(session: SessionDoc, id: string, content?: string, options?: PostOptions) {
     const user = Sessioning.getUser(session);
@@ -165,6 +152,14 @@ class Routes {
     return await Friending.rejectRequest(fromOid, user);
   }
 
+
+  @Router.post("/group")
+  async createGroup(session: SessionDoc, title: string) {
+    const user = Sessioning.getUser(session);
+    const created = await Grouping.create(user, title);
+    return { msg: created.msg, groupId: created.groupId };
+  }
+
   // Add another user to a group that you are already in
   @Router.put("/group/:userId")
   async addToGroup(session: SessionDoc, inviteeId: string, groupId: string) {
@@ -175,47 +170,88 @@ class Routes {
     return await Grouping.inviteUser(groupOid, inviteeOid);
   }
 
-// If a user is logged in, add an event to the calendar
-@Router.put("/calendar/event")
-async addEventToCalendar(session: SessionDoc, eventId: string) {
+  @Router.delete("/groups/:groupId/members")
+async leaveGroup(session: SessionDoc, groupId: string) {
   const user = Sessioning.getUser(session);
-  await Calendaring.addItem(user, eventId); // Adding the event to the user's calendar
-  return { msg: "Event added to calendar!" };
+  const groupOid = new ObjectId(groupId);
+
+  // Ensure the user is a member of the group before attempting to leave
+  await Grouping.assertIsInGroup(user, groupOid);
+
+  // Delete any events created by the user within this group
+  await Eventing.deleteEventsByCreatorAndGroup(user, groupOid);
+
+  // Call the leaveGroup function from GroupingConcept to remove the user from the group
+  const result = await Grouping.leaveGroup(groupOid, user);
+  return result;
 }
 
 
+  /**
+ * remove user from group
+ * Specific errors beyond basic
+ */
 
+  @Router.post("/events/:groupId")
+  async createEvent(session: SessionDoc, groupId: string, title: string, date: Date, description?: string) {
+      const user = Sessioning.getUser(session);
+      const groupOid = new ObjectId(groupId);
 
-  // You can delete your own calendar event
-  @Router.delete("/calendar/:eventId")
-  async deleteEventFromCalendar(session: SessionDoc, userId: string, eventId: string) {
-    const user = Sessioning.getUser(session);
-    const eventOid = new ObjectId(eventId)
-    const userOid = new ObjectId(userId)
-    await Eventing.assertCreatorIsUser(eventOid, user);
-    return await Calendaring.removeItem(userOid,eventId);
-  }
+      await Grouping.assertIsInGroup(user, groupOid); // Check if user is in group
 
-  // Get calendar events by group members
-  @Router.get("/calendar/group/:members")
-  async getEventsByGroupId(session: SessionDoc, members: string[])
-   {
-    const membersOid: ObjectId[] = members.map(id => new ObjectId(id));
-    const user = Sessioning.getUser(session);
-    const events = await Calendaring.getItemsByGroupMembers(membersOid);
-    return { msg: "Fetched calendar events for group!", events };
+      // Pass both creator (user) and groupId to the create function
+      return await Eventing.create(user, groupOid, title, date, description);
   }
 
 
-  // Get calendar events by groupId
-  @Router.get("/calendar/group/:groupId")
-  async getCalendarEventsByGroupId(session: SessionDoc, groupId: string) {
-    const user = Sessioning.getUser(session);
-    const groupoid = new ObjectId(groupId)
-    const members = await Grouping.getMembers(groupoid);
-    const events = await Calendaring.getItemsByGroupMembers(members);
-    return { msg: "Fetched calendar events for group members!", events };
+@Router.patch("/events/:eventId")
+async editEvent(session: SessionDoc, eventId: string, title?: string, date?: Date, description?: string, attendees?: ObjectId[]) {
+  const user = Sessioning.getUser(session);
+  const eventOid = new ObjectId(eventId);
+
+  // Ensure the user is allowed to edit the event by checking group membership
+  const event = await Eventing.events.readOne({ _id: eventOid });
+  if (!event) throw new NotFoundError(`Event ${eventId} does not exist!`);
+
+  await Grouping.assertIsInGroup(user, event.creator);
+
+  // Perform the edit
+  await Eventing.events.partialUpdateOne({ _id: eventOid }, { title, date, description, attendees });
+  return { msg: "Event updated successfully!" };
+}
+
+@Router.delete("/groups/:groupId")
+async deleteGroup(session: SessionDoc, groupId: string) {
+  const user = Sessioning.getUser(session);
+  const groupOid = new ObjectId(groupId);
+
+  // Assert the user is in the group
+  await Grouping.assertIsInGroup(user, groupOid);
+
+  // Delete events associated with the group
+  const groupEvents = await Eventing.events.readMany({ creator: groupOid });
+  for (const event of groupEvents) {
+    await Eventing.delete(event._id);
   }
+
+  // Delete the group
+  await Grouping.groups.deleteOne({ _id: groupOid });
+  return { msg: "Group and all associated events deleted successfully!" };
+}
+
+@Router.get("/groups/:groupId/events")
+async getEvents(session: SessionDoc, groupId: string) {
+  const user = Sessioning.getUser(session);
+  const groupOid = new ObjectId(groupId);
+
+  // Verify the user is a member of the group
+  await Grouping.assertIsInGroup(user, groupOid);
+
+  // Retrieve events associated with the group by passing `groupId`
+  const events = await Eventing.getEventsByGroupId(groupOid);
+  return events;
+}
+
 }
 
 /** The web app. */

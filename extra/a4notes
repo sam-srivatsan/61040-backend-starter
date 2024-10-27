@@ -1,0 +1,29 @@
+separate creategroup from addusertogroup: on frontend, only take a title. have that have its own route API
+- creategroup function in grouping.ts concept - DONE? or is inviteuser function not actually updating member list
+- routes.ts DONE
+- utils.ts DONE
+
+
+
+REMOVE calendaring such that each group has events
+- each member in the group can post an event
+- get events by group id: when you have the group id, be able to return all the calendar events
+- you no longer need a get event by member/user - it is only a group thing
+- the owner would be a group id
+- to check whether person can edit events, check if they are a group member
+
+
+sync: automatic initialization of eventslist WHEN you create a group
+add event to group eventslist: eventId, groupId
+get events for group: groupid
+
+
+create group
+add a user to group
+remove user from group
+
+
+SYNCS: EVENT, GROUP
+add event
+delete event
+get events in a group

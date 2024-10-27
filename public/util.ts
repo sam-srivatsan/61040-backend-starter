@@ -48,7 +48,7 @@ const operations: Operation[] = [
     name: "Create Group",
     endpoint: "/api/group",
     method: "POST",
-    fields: { title: "input", members: "input" },
+    fields: { title: "input"},
   },
   {
     name: "Create Calendar",
