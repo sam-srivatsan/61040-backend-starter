@@ -104,26 +104,6 @@ const operations: Operation[] = [
     method: "DELETE",
     fields: { groupId: "input" },
   },
-  {
-    name: "Create Event",
-    endpoint: "/api/events/:groupId",
-    method: "POST",
-    fields: { groupId: "input", title: "input" }, //add date (format) and description?
-  },
-  {
-    name: "Edit Event",
-    endpoint: "/api/events/:eventId",
-    method: "PATCH",
-    fields: { groupId: "input" , title: "input" }, // date field etc
-  },
-  {
-    name: "Get Events by Group ID",
-    endpoint: "/api/groups/:groupId/events",
-    method: "GET",
-    fields: { groupId: "input" },
-  },
-
-
   // New operation to delete a user from a group and their events
   {
     name: "Remove User from Group",
@@ -131,9 +111,24 @@ const operations: Operation[] = [
     method: "DELETE",
     fields: { userId: "input" },
   },
-
-
-
+  {
+    name: "Create Event",
+    endpoint: "/api/events/:groupId",
+    method: "POST",
+    fields: { groupId: "input", title: "input", date: "input", description: "textarea" }, // Added date and description
+  },
+  {
+    name: "Edit Event",
+    endpoint: "/api/events/:eventId",
+    method: "PATCH",
+    fields: { eventId: "input", title: "input", date: "input", description: "textarea" }, // Added date and description
+  },
+  {
+    name: "Get Events by Group ID",
+    endpoint: "/api/groups/:groupId/events",
+    method: "GET",
+    fields: { groupId: "input" },
+  },
 
   //
   // ...
