@@ -189,7 +189,7 @@ async leaveGroup(session: SessionDoc, groupId: string) {
 }
 
   @Router.post("/events/:groupId")
-  async createEvent(session: SessionDoc, groupId: string, title: string, date: Date, description?: string) {
+  async createEvent(session: SessionDoc, groupId: string, title: string, date: string, description?: string) {
       const user = Sessioning.getUser(session);
       const groupOid = new ObjectId(groupId);
 
