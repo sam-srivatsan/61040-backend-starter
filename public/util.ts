@@ -112,7 +112,7 @@ const operations: Operation[] = [
     fields: { userId: "input" },
   },
   {
-    name: "Create Event",
+    name: "Create Event: enter date in MM/DD/YY format!",
     endpoint: "/api/events/:groupId",
     method: "POST",
     fields: { groupId: "input", title: "input", date: "input", description: "textarea" }, // Added date and description
